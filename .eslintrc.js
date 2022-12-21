@@ -18,6 +18,7 @@ module.exports = {
     "unused-imports",
   ],
   rules: {
+    "react/prop-types": "off",
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "import/first": "error",
