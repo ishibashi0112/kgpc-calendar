@@ -5,16 +5,17 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  Timestamp,
 } from "firebase/firestore";
 
-import { postConverter } from "./convater";
+import { postConverter, userConverter } from "./convater";
 import { db } from "./firebase";
 
-export type Post = {
+export type Post<T extends Date | Timestamp | string = Date> = {
   id: string;
-  date: Date;
+  date: T;
   title: string;
-  file: File | null;
+  file: string | null;
   description: string;
   isCompleted: boolean;
   userId: string;
@@ -27,20 +28,33 @@ export type User = {
   type: "発注" | "部品";
 };
 
-export const getPosts = async (): Promise<Post[]> => {
+export type PostUser<T extends Date | Timestamp | string = Date> = Omit<
+  Post<T>,
+  "userId"
+> & { user: User };
+
+export const getPosts = async (): Promise<PostUser[]> => {
   const querySnapshot = await getDocs(
     collection(db, "posts").withConverter(postConverter)
   );
 
-  const postsData = querySnapshot.docs.map((postDoc) => ({
-    ...postDoc.data(),
-    id: postDoc.id,
-  }));
+  const postsData = await Promise.all(
+    querySnapshot.docs.map(async (postDoc) => {
+      const postData = postDoc.data();
+      const user = await getUser(postData.userId);
+      return {
+        ...postData,
+        id: postDoc.id,
+        date: postData.date.toDate(),
+        user,
+      };
+    })
+  );
 
   return postsData;
 };
 
-export const getPost = async (id: string): Promise<Post> => {
+export const getPost = async (id: string): Promise<PostUser<Date>> => {
   const docRef = doc(db, "posts", id).withConverter(postConverter);
   const docSnap = await getDoc(docRef);
 
@@ -48,12 +62,35 @@ export const getPost = async (id: string): Promise<Post> => {
     throw new Error("対象の予定がありません");
   }
 
-  const post = docSnap.data();
+  const postDoc = docSnap.data();
+  const user = await getUser(postDoc.userId);
+  const post = {
+    ...postDoc,
+    date: postDoc.date.toDate(),
+    id: docSnap.id,
+    user,
+  };
 
   return post;
 };
 
-export const createPost = async (data: Omit<Post, "id">): Promise<void> => {
+export const getUser = async (id: string) => {
+  const docRef = doc(db, "users", id).withConverter(userConverter);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    throw new Error("対象のuser情報がありません");
+  }
+
+  const userDoc = docSnap.data();
+  const user = { ...userDoc, id: docSnap.id };
+
+  return user;
+};
+
+export const createPost = async (
+  data: Omit<Post<Date>, "id">
+): Promise<void> => {
   await addDoc(collection(db, "posts"), data);
 };
 

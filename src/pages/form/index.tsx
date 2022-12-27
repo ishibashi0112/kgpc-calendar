@@ -8,6 +8,7 @@ import { GetServerSideProps, NextPage } from "next";
 import React, { useCallback, useState } from "react";
 import { auth } from "src/lib/firebase/firebase";
 import { createPost } from "src/lib/firebase/firestore";
+import { fileDownload, fileUpload } from "src/lib/firebase/storage";
 import { Layout } from "src/pages-Layout/Layout";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -44,9 +45,21 @@ const Form: NextPage<Props> = ({ date }) => {
       if (!currentUserId) {
         return;
       }
+
       try {
-        const data = { ...values, isCompleted: false, userId: currentUserId };
+        let filePath = null;
+        if (values.file) {
+          filePath = `${dayjs().format("YYYYMMDDhhmmss")}_${values.file.name}`;
+          await fileUpload(values.file, filePath);
+        }
+        const data = {
+          ...values,
+          isCompleted: false,
+          userId: currentUserId,
+          file: filePath,
+        };
         await createPost(data);
+        alert("作成しました。");
       } catch (error) {
         console.log(error);
         alert("予定登録でエラーが発生しました");
@@ -56,6 +69,10 @@ const Form: NextPage<Props> = ({ date }) => {
     },
     [currentUserId]
   );
+
+  const handleFileDownload = async () => {
+    await fileDownload("20221222060626518HZ830L01.xlsx");
+  };
 
   return (
     <Layout>
@@ -89,6 +106,13 @@ const Form: NextPage<Props> = ({ date }) => {
           >
             予定を作成
           </Button>
+          <Button onClick={handleFileDownload}>image</Button>
+          <a
+            href="https://firebasestorage.googleapis.com/v0/b/kgpc-calendar.appspot.com/o/20221222060626518HZ830L01.xlsx?alt=media&token=c8c2e415-a7c0-48b5-a670-e972fff8fa7e"
+            download
+          >
+            aaaa
+          </a>
         </form>
       </div>
     </Layout>

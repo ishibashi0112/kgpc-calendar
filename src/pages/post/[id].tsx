@@ -1,33 +1,35 @@
-import { Title } from "@mantine/core";
 import dayjs from "dayjs";
 import { GetServerSideProps, NextPage } from "next";
 import React from "react";
-import { getPost, Post } from "src/lib/firebase/firestore";
+import { getPost, PostUser } from "src/lib/firebase/firestore";
+import { PostIdBody } from "src/pages-component/post/PostIdBody";
 import { Layout } from "src/pages-Layout/Layout";
 
 type Props = {
-  post: Post;
+  post: PostUser<string>;
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx: any) => {
   try {
     const post = await getPost(ctx.params.id);
-    return { props: { post } };
+
+    const dateToStringPost = {
+      ...post,
+      date: dayjs(post.date).format("YY年MM月DD日"),
+    };
+
+    return { props: { post: dateToStringPost } };
   } catch (error) {
     console.log(error);
 
-    return { props: {} };
+    return { props: { post: {} } };
   }
 };
 
 const PostId: NextPage<Props> = ({ post }) => {
   return (
     <Layout>
-      <div className="p-3">
-        <Title className="mb-5" order={4}>
-          {`${dayjs(post.date).format("YY年MM月DD日")}　${post.title}`}
-        </Title>
-      </div>
+      <PostIdBody post={post} />
     </Layout>
   );
 };

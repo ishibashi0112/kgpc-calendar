@@ -1,16 +1,20 @@
 import {
   FirestoreDataConverter,
   QueryDocumentSnapshot,
+  Timestamp,
   WithFieldValue,
 } from "firebase/firestore";
 
 import { Post, User } from "./firestore";
 
-export const postConverter: FirestoreDataConverter<Post> = {
-  toFirestore: (post: WithFieldValue<Post>) => {
+export const postConverter: FirestoreDataConverter<Post<Timestamp>> = {
+  toFirestore: (post: WithFieldValue<Post<Timestamp>>) => {
     return post;
   },
-  fromFirestore: (snapshot: QueryDocumentSnapshot<Post>, options) => {
+  fromFirestore: (
+    snapshot: QueryDocumentSnapshot<Post<Timestamp>>,
+    options
+  ) => {
     const data = snapshot.data(options);
     return data;
   },

@@ -12,7 +12,7 @@ type Props = {
 export const Layout: FC<Props> = ({ children }) => {
   const { pathname } = useRouter();
 
-  const size = pathname === "/" ? "xl" : "md";
+  const size = pathname === "/form" ? "md" : "lg";
   return (
     <div>
       <Header />

@@ -1,70 +1,45 @@
 import "dayjs/locale/ja";
 
-import { Badge, Button, Group, List, Text, ThemeIcon } from "@mantine/core";
-import { IconCircleCheck, IconFileDots } from "@tabler/icons";
+import { Button, Group, Stack, Text } from "@mantine/core";
 import dayjs from "dayjs";
 import Link from "next/link";
 import React, { FC } from "react";
-import { Post } from "src/lib/firebase/firestore";
+import { PostUser } from "src/lib/firebase/firestore";
+import { state } from "src/lib/store/valtio";
+import { useSnapshot } from "valtio";
+
+import { PostList } from "./PostList";
 
 type Props = {
-  posts: Post[];
-  selectedDate: Date | null;
+  posts: PostUser<string>[];
 };
 
-export const ScheduleList: FC<Props> = ({ posts, selectedDate }) => {
+export const ScheduleList: FC<Props> = ({ posts }) => {
+  const snap = useSnapshot(state);
   const selectedDatePosts = posts.filter(
-    (post) =>
-      dayjs(selectedDate).format("YYYY-MM-DD") ===
-      dayjs(post.date).format("YYYY-MM-DD")
+    (post) => dayjs(snap.selectedDate).format("YYYY-MM-DD") === post.date
   );
 
   return (
     <div className="flex-1 p-3">
-      <Group className="mb-5" align="self-start">
-        <Text>{`${dayjs(selectedDate).format("YY年M月D日")}の予定`}</Text>
+      <Group className="mb-5" align="center">
+        <Text>{`${dayjs(snap.selectedDate).format("YY年M月D日")}の予定`}</Text>
         <Button
           className="ml-5"
           compact
           size="xs"
           component={Link}
-          href={`/form?date=${dayjs(selectedDate).format("YYYY-MM-DD")}`}
+          href={`/form?date=${dayjs(snap.selectedDate).format("YYYY-MM-DD")}`}
         >
           予定を追加
         </Button>
       </Group>
 
-      <List
-        spacing="lg"
-        size="sm"
-        center
-        icon={
-          <ThemeIcon color="teal" size={24} radius="xl">
-            <IconCircleCheck size={16} />
-          </ThemeIcon>
-        }
-      >
+      <Stack>
         {selectedDatePosts.map((post) => (
-          <List.Item key={post.id}>
-            <Group>
-              <Link href={`/post/${post.id}`}>{post.title}</Link>
-              <Badge
-                className="cursor-pointer"
-                variant="outline"
-                color="dark"
-                leftSection={
-                  <div className="flex items-center">
-                    <IconFileDots size={16} />
-                  </div>
-                }
-              >
-                添付無し
-              </Badge>
-              <Badge variant="outline">作成：石橋</Badge>
-            </Group>
-          </List.Item>
+          <PostList key={post.id} post={post} />
         ))}
-      </List>
+      </Stack>
     </div>
   );
 };

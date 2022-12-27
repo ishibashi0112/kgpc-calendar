@@ -3,28 +3,32 @@ import "dayjs/locale/ja";
 import { Indicator } from "@mantine/core";
 import { Calendar as MantineCalendar } from "@mantine/dates";
 import dayjs from "dayjs";
+import { useRouter } from "next/router";
 import React, { FC, ReactNode, useCallback } from "react";
-import { Post } from "src/lib/firebase/firestore";
+import { state } from "src/lib/store/valtio";
+import { useSnapshot } from "valtio";
 
-type Props = {
-  posts: Post[];
-  selectedDate: Date | null;
-  setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
-};
+export const Calendar: FC = () => {
+  const snap = useSnapshot(state);
+  const { pathname, push } = useRouter();
 
-export const Calendar: FC<Props> = ({
-  posts,
-  selectedDate,
-  setSelectedDate,
-}) => {
+  const handleOnchange = useCallback(
+    async (value: Date | null) => {
+      if (pathname !== "/") {
+        await push("/");
+      }
+      state.selectedDate = value;
+    },
+    [pathname]
+  );
+
   const dayViewRender = useCallback(
     (date: Date): ReactNode => {
       const day = date.getDate();
       const calendarDateStr = dayjs(date).format("YYYY-MM-DD");
 
-      const postsInDate = posts.filter((post) => {
-        const postDateStr = dayjs(post.date).format("YYYY-MM-DD");
-        return calendarDateStr === postDateStr;
+      const postsInDate = snap.posts.filter((post) => {
+        return calendarDateStr === post.date;
       });
 
       return (
@@ -39,7 +43,7 @@ export const Calendar: FC<Props> = ({
         </Indicator>
       );
     },
-    [posts]
+    [snap.posts]
   );
 
   return (
@@ -49,8 +53,8 @@ export const Calendar: FC<Props> = ({
         labelFormat="YYYY/MM"
         locale="ja"
         firstDayOfWeek="sunday"
-        value={selectedDate}
-        onChange={setSelectedDate}
+        value={snap.selectedDate}
+        onChange={handleOnchange}
         renderDay={dayViewRender}
       />
     </div>
