@@ -3,7 +3,9 @@ import "dayjs/locale/ja";
 import {
   Anchor,
   Avatar,
+  Container,
   Flex,
+  Group,
   Header as MantineHeader,
   Menu,
   Skeleton,
@@ -11,8 +13,9 @@ import {
 import { IconLogout } from "@tabler/icons";
 import Link from "next/link";
 import React, { FC } from "react";
-import { PostStateIcon } from "src/component/postStateIcon";
+import { PostStateIcon } from "src/component/PostStateIcon";
 import { signOut } from "src/lib/firebase/firebaseAuth";
+import { useDarkMode } from "src/lib/hook/useDarkMode";
 import { state } from "src/lib/store/valtio";
 import { useSnapshot } from "valtio";
 
@@ -27,6 +30,7 @@ const handleSignOut = async () => {
 
 export const Header: FC = () => {
   const snap = useSnapshot(state);
+  const { Switch } = useDarkMode();
 
   const currentUserPosts = snap.posts.filter(
     (post) => post.user.id === snap.user?.id
@@ -34,47 +38,56 @@ export const Header: FC = () => {
 
   return (
     <MantineHeader height={50}>
-      <Flex className="h-full mx-5" justify={"space-between"} align="center">
-        <Anchor align="start" underline={false} component={Link} href="/">
-          カレンダー
-        </Anchor>
+      <Container size="lg">
+        <Flex
+          className="h-[50px] mx-5"
+          justify={"space-between"}
+          align="center"
+        >
+          <Anchor align="start" underline={false} component={Link} href="/">
+            カレンダー
+          </Anchor>
+          <Group>
+            {Switch}
 
-        {snap.user ? (
-          <Menu position="bottom-end">
-            <Menu.Target>
-              <Avatar color="cyan" radius="xl">
-                {snap.user.name.slice(0, 2)}
-              </Avatar>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Label>Application</Menu.Label>
-              <Menu.Divider />
-              <Menu.Label>登録予定一覧</Menu.Label>
-              {currentUserPosts.map((post) => (
-                <Menu.Item
-                  key={post.id}
-                  icon={<PostStateIcon post={post} />}
-                  component={Link}
-                  href={`/post/${post.id}`}
-                >
-                  {post.title}{" "}
-                </Menu.Item>
-              ))}
+            {snap.user ? (
+              <Menu position="bottom-end">
+                <Menu.Target>
+                  <Avatar color="cyan" radius="xl">
+                    {snap.user.name.slice(0, 2)}
+                  </Avatar>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Application</Menu.Label>
+                  <Menu.Divider />
+                  <Menu.Label>登録予定一覧</Menu.Label>
+                  {currentUserPosts.map((post) => (
+                    <Menu.Item
+                      key={post.id}
+                      icon={<PostStateIcon post={post} />}
+                      component={Link}
+                      href={`/post/${post.id}`}
+                    >
+                      {post.title}{" "}
+                    </Menu.Item>
+                  ))}
 
-              <Menu.Divider />
-              <Menu.Item
-                color="red"
-                icon={<IconLogout />}
-                onClick={handleSignOut}
-              >
-                サインアウト
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        ) : (
-          <Skeleton circle height={38} />
-        )}
-      </Flex>
+                  <Menu.Divider />
+                  <Menu.Item
+                    color="red"
+                    icon={<IconLogout />}
+                    onClick={handleSignOut}
+                  >
+                    サインアウト
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            ) : (
+              <Skeleton circle height={38} />
+            )}
+          </Group>
+        </Flex>
+      </Container>
     </MantineHeader>
   );
 };
