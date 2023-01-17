@@ -1,25 +1,32 @@
 import "dayjs/locale/ja";
 
-import { Indicator } from "@mantine/core";
+import { Group, Indicator, Space, Switch } from "@mantine/core";
 import { Calendar as MantineCalendar } from "@mantine/dates";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import React, { FC, ReactNode, useCallback } from "react";
-import { state } from "src/lib/store/valtio";
+import { usePosts } from "src/lib/hook/swr/usePosts";
+import {
+  setSelectedDate,
+  setSelectedDatePosts,
+  state,
+} from "src/lib/store/valtio";
 import { useSnapshot } from "valtio";
 
 export const Calendar: FC = () => {
-  const snap = useSnapshot(state);
+  const { selectedDate } = useSnapshot(state);
   const { pathname, push } = useRouter();
+  const { posts } = usePosts();
 
   const handleOnchange = useCallback(
     async (value: Date | null) => {
       if (pathname !== "/") {
         await push("/");
       }
-      state.selectedDate = value;
+      setSelectedDate(value);
+      setSelectedDatePosts(posts, value);
     },
-    [pathname]
+    [pathname, posts]
   );
 
   const dayViewRender = useCallback(
@@ -27,9 +34,11 @@ export const Calendar: FC = () => {
       const day = date.getDate();
       const calendarDateStr = dayjs(date).format("YYYY-MM-DD");
 
-      const postsInDate = snap.posts.filter((post) => {
-        return calendarDateStr === post.date;
-      });
+      const postsInDate = posts
+        ? posts.filter((post) => {
+            return calendarDateStr === dayjs(post.date).format("YYYY-MM-DD");
+          })
+        : [];
 
       return (
         <Indicator
@@ -43,7 +52,7 @@ export const Calendar: FC = () => {
         </Indicator>
       );
     },
-    [snap.posts]
+    [posts]
   );
 
   return (
@@ -53,10 +62,16 @@ export const Calendar: FC = () => {
         labelFormat="YYYY/MM"
         locale="ja"
         firstDayOfWeek="sunday"
-        value={snap.selectedDate}
+        value={selectedDate}
         onChange={handleOnchange}
         renderDay={dayViewRender}
       />
+
+      <Space h="xs" />
+
+      <Group position="right">
+        <Switch labelPosition="left" label="関係のある予定のみ表示" />
+      </Group>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import {
+  deleteObject,
   getDownloadURL,
   ref,
   uploadBytes,
@@ -22,4 +23,9 @@ export const fileDownload = async (filePath: string) => {
   const fileURL = await getDownloadURL(storageRef);
 
   return fileURL;
+};
+
+export const deleteFile = async (filePath: string): Promise<void> => {
+  const storageRef = ref(storage, filePath);
+  await deleteObject(storageRef);
 };

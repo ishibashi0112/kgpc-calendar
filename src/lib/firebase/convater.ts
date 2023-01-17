@@ -4,8 +4,7 @@ import {
   Timestamp,
   WithFieldValue,
 } from "firebase/firestore";
-
-import { Post, User } from "./firestore";
+import { Post, User } from "src/type/types";
 
 export const postConverter: FirestoreDataConverter<Post<Timestamp>> = {
   toFirestore: (post: WithFieldValue<Post<Timestamp>>) => {

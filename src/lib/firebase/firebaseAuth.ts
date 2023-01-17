@@ -4,9 +4,10 @@ import {
   signOut as firebaseSignOut,
   UserCredential,
 } from "firebase/auth";
+import { User } from "src/type/types";
 
 import { auth } from "./firebase";
-import { createUser, User } from "./firestore";
+import { createUser } from "./firestore";
 
 type SignUpData = {
   email: string;
@@ -36,7 +37,13 @@ export const signUp = async (data: SignUpValues): Promise<void> => {
     data.password
   );
 
-  await createUser(user.user.uid, data);
+  const userData = {
+    name: data.name,
+    email: data.email,
+    type: data.type,
+  };
+
+  await createUser(user.user.uid, userData);
 };
 
 export const signOut = async (): Promise<void> => {

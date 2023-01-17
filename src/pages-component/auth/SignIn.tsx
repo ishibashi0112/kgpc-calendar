@@ -72,7 +72,12 @@ export const SignIn: FC = () => {
         className="flex flex-col gap-3"
         onSubmit={form.onSubmit(handleSubmit)}
       >
-        <TextInput label="email" required {...form.getInputProps("email")} />
+        <TextInput
+          label="email"
+          type="email"
+          required
+          {...form.getInputProps("email")}
+        />
         <PasswordInput
           label="password"
           required

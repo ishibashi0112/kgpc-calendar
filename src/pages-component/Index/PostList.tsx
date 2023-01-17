@@ -1,11 +1,12 @@
 import "dayjs/locale/ja";
 
-import { Avatar, Badge, Group, Text } from "@mantine/core";
+import { Anchor, Badge, Group, Text } from "@mantine/core";
+import { IconUser } from "@tabler/icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { FC } from "react";
-import { PostStateIcon } from "src/component/postStateIcon";
-import { PostUser } from "src/lib/firebase/firestore";
+import { PostStateIcon } from "src/component/PostStateIcon";
+import { PostUser } from "src/type/types";
 
 import { FileBadge } from "./FileBadge";
 
@@ -15,27 +16,41 @@ type Props = {
 
 export const PostList: FC<Props> = ({ post }) => {
   const { pathname } = useRouter();
+
   return (
-    <Group key={post.id} position="apart" align="center">
+    <Group key={post.id} position="apart" align="center" noWrap>
       <Group spacing="sm">
         <PostStateIcon post={post} />
         {pathname === "/" ? (
-          <Link className="block" href={`/post/${post.id}`}>
+          <Anchor
+            className="flex-1"
+            variant="text"
+            component={Link}
+            href={`/post/${post.id}`}
+            lineClamp={1}
+          >
             {post.title}
-          </Link>
+          </Anchor>
         ) : (
-          <Text>{post.title}</Text>
+          <Text className="max-w-[450px] flex-1" lineClamp={1}>
+            {post.title}
+          </Text>
         )}
       </Group>
 
-      <Group spacing="sm">
+      <Group spacing="sm" noWrap>
         <FileBadge post={post} />
 
         <Badge
-          className="pl-0"
+          classNames={{ root: "pl-0", leftSection: "mx-1" }}
           variant="filled"
           color="gray"
-          leftSection={<Avatar alt="Avatar for badge" size={24} />}
+          title="作成者"
+          leftSection={
+            <Group position="center">
+              <IconUser size={14} />
+            </Group>
+          }
         >{`${post.user.name.slice(0, 3)}`}</Badge>
       </Group>
     </Group>

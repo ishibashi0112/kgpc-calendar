@@ -1,37 +1,17 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
   setDoc,
-  Timestamp,
+  updateDoc,
 } from "firebase/firestore";
+import { Post, PostUser, Processes, User } from "src/type/types";
 
 import { postConverter, userConverter } from "./convater";
 import { db } from "./firebase";
-
-export type Post<T extends Date | Timestamp | string = Date> = {
-  id: string;
-  date: T;
-  title: string;
-  file: string | null;
-  description: string;
-  isCompleted: boolean;
-  userId: string;
-};
-
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  type: "発注" | "部品";
-};
-
-export type PostUser<T extends Date | Timestamp | string = Date> = Omit<
-  Post<T>,
-  "userId"
-> & { user: User };
 
 export const getPosts = async (): Promise<PostUser[]> => {
   const querySnapshot = await getDocs(
@@ -41,11 +21,16 @@ export const getPosts = async (): Promise<PostUser[]> => {
   const postsData = await Promise.all(
     querySnapshot.docs.map(async (postDoc) => {
       const postData = postDoc.data();
-      const user = await getUser(postData.userId);
+      const user = await getUserById(postData.userId);
+      const dateToStringInProcesses = postData.processes.map((process) => ({
+        ...process,
+        updatedAt: process.updatedAt.toDate(),
+      }));
       return {
         ...postData,
         id: postDoc.id,
         date: postData.date.toDate(),
+        processes: dateToStringInProcesses,
         user,
       };
     })
@@ -54,7 +39,7 @@ export const getPosts = async (): Promise<PostUser[]> => {
   return postsData;
 };
 
-export const getPost = async (id: string): Promise<PostUser<Date>> => {
+export const getPostById = async (id: string): Promise<PostUser<Date>> => {
   const docRef = doc(db, "posts", id).withConverter(postConverter);
   const docSnap = await getDoc(docRef);
 
@@ -63,18 +48,41 @@ export const getPost = async (id: string): Promise<PostUser<Date>> => {
   }
 
   const postDoc = docSnap.data();
-  const user = await getUser(postDoc.userId);
+  const dateToStringInProcesses = postDoc.processes.map((process) => ({
+    ...process,
+    updatedAt: process.updatedAt.toDate(),
+  }));
+
+  const user = await getUserById(postDoc.userId);
+
   const post = {
     ...postDoc,
     date: postDoc.date.toDate(),
     id: docSnap.id,
     user,
+    processes: dateToStringInProcesses,
   };
 
   return post;
 };
 
-export const getUser = async (id: string) => {
+export const getUsers = async (): Promise<User[]> => {
+  const querySnapshot = await getDocs(
+    collection(db, "users").withConverter(userConverter)
+  );
+
+  const usersData = querySnapshot.docs.map((userDoc) => {
+    const userData = userDoc.data();
+    return {
+      ...userData,
+      id: userDoc.id,
+    };
+  });
+
+  return usersData;
+};
+
+export const getUserById = async (id: string) => {
   const docRef = doc(db, "users", id).withConverter(userConverter);
   const docSnap = await getDoc(docRef);
 
@@ -99,4 +107,23 @@ export const createUser = async (
   data: Omit<User, "id">
 ): Promise<void> => {
   await setDoc(doc(db, "users", id), data);
+};
+
+export const updateProcess = async (
+  postId: string,
+  data: Processes<Date>[]
+): Promise<void> => {
+  const posts = await updateDoc(doc(db, "posts", postId), { processes: data });
+  console.log(posts);
+};
+
+export const updatePost = async (
+  postId: string,
+  data: Partial<Post<Date>>
+): Promise<void> => {
+  await updateDoc(doc(db, "posts", postId), data);
+};
+
+export const deletePost = async (postId: string): Promise<void> => {
+  await deleteDoc(doc(db, "posts", postId));
 };

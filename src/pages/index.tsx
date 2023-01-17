@@ -1,41 +1,43 @@
 import "dayjs/locale/ja";
 
-import dayjs from "dayjs";
 import { GetServerSideProps, NextPage } from "next";
 import React from "react";
-import { getPosts, PostUser } from "src/lib/firebase/firestore";
-import { state } from "src/lib/store/valtio";
+import { getPosts } from "src/lib/firebase/firestore";
+import { formatPosts } from "src/lib/utils/function";
 import { IndexBody } from "src/pages-component/Index/IndexBody";
 import { Layout } from "src/pages-Layout/Layout";
+import { PostUser } from "src/type/types";
+import { SWRConfig } from "swr";
 
 type Props = {
-  posts: PostUser<string>[];
+  fallback: { "/posts": PostUser<string>[] };
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
     const posts = await getPosts();
-    const dateToStringInPosts = posts.map((post) => {
-      return { ...post, date: dayjs(post.date).format("YYYY-MM-DD") };
-    });
+    const dateToStringInPosts = formatPosts(posts);
 
     return {
       props: {
-        posts: dateToStringInPosts,
+        fallback: {
+          "/posts": dateToStringInPosts,
+        },
       },
     };
   } catch (error) {
     console.log(error);
-    return { props: { posts: [] } };
+    return { props: {} };
   }
 };
 
-const Home: NextPage<Props> = ({ posts }) => {
-  state.posts = posts;
+const Home: NextPage<Props> = ({ fallback }) => {
   return (
-    <Layout>
-      <IndexBody posts={posts} />
-    </Layout>
+    <SWRConfig value={{ fallback }}>
+      <Layout>
+        <IndexBody />
+      </Layout>
+    </SWRConfig>
   );
 };
 

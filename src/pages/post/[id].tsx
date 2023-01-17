@@ -1,36 +1,37 @@
-import dayjs from "dayjs";
 import { GetServerSideProps, NextPage } from "next";
 import React from "react";
-import { getPost, PostUser } from "src/lib/firebase/firestore";
+import { getPostById } from "src/lib/firebase/firestore";
+import { formatPost } from "src/lib/utils/function";
 import { PostIdBody } from "src/pages-component/post/PostIdBody";
 import { Layout } from "src/pages-Layout/Layout";
+import { PostUser } from "src/type/types";
+import { SWRConfig } from "swr";
 
 type Props = {
-  post: PostUser<string>;
+  fallback: Record<string, PostUser<string>>;
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx: any) => {
+  const postId = ctx.params.id as string;
   try {
-    const post = await getPost(ctx.params.id);
+    const post = await getPostById(postId);
+    const dateToStringPost = formatPost(post);
 
-    const dateToStringPost = {
-      ...post,
-      date: dayjs(post.date).format("YY年MM月DD日"),
-    };
-
-    return { props: { post: dateToStringPost } };
+    return { props: { fallback: { [`/post/${postId}`]: dateToStringPost } } };
   } catch (error) {
     console.log(error);
 
-    return { props: { post: {} } };
+    return { props: { fallback: { [`/post/${postId}`]: {} } } };
   }
 };
 
-const PostId: NextPage<Props> = ({ post }) => {
+const PostId: NextPage<Props> = ({ fallback }) => {
   return (
-    <Layout>
-      <PostIdBody post={post} />
-    </Layout>
+    <SWRConfig value={{ fallback }}>
+      <Layout>
+        <PostIdBody />
+      </Layout>
+    </SWRConfig>
   );
 };
 
