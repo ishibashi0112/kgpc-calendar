@@ -55,16 +55,24 @@ export const Header: FC = () => {
     <MantineHeader height={50} withBorder>
       <Container size="lg">
         <Flex className="h-[50px]" justify={"space-between"} align="center">
-          <Anchor
-            variant="text"
-            weight="bold"
-            align="start"
-            underline={false}
-            component={Link}
-            href="/"
-          >
-            カレンダー
-          </Anchor>
+          <Group spacing={5}>
+            <Avatar
+              className="border-solid border-[0.5px]"
+              src="/logo.png"
+              alt="no image here"
+              size="sm"
+            />
+            <Anchor
+              variant="text"
+              weight="bold"
+              align="start"
+              underline={false}
+              component={Link}
+              href="/"
+            >
+              カレンダー
+            </Anchor>
+          </Group>
           <Group>
             {Switch}
 
