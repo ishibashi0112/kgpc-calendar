@@ -1,6 +1,7 @@
 import "dayjs/locale/ja";
 
 import { Anchor, Badge, Group, Text } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { IconUser } from "@tabler/icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -16,9 +17,18 @@ type Props = {
 
 export const PostList: FC<Props> = ({ post }) => {
   const { pathname } = useRouter();
+  const matches = useMediaQuery("(min-width: 890px)", true, {
+    getInitialValueInEffect: false,
+  });
 
   return (
-    <Group key={post.id} position="apart" align="center" noWrap>
+    <Group
+      key={post.id}
+      position="apart"
+      align="center"
+      noWrap={matches}
+      spacing={matches ? "sm" : 5}
+    >
       <Group spacing="sm">
         <PostStateIcon post={post} />
         {pathname === "/" ? (
@@ -38,7 +48,7 @@ export const PostList: FC<Props> = ({ post }) => {
         )}
       </Group>
 
-      <Group spacing="sm" noWrap>
+      <Group spacing="sm" noWrap position="right">
         <FileBadge post={post} />
 
         <Badge

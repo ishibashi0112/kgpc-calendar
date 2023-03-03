@@ -2,6 +2,7 @@ import "dayjs/locale/ja";
 
 import { Card, Indicator } from "@mantine/core";
 import { Calendar as MantineCalendar } from "@mantine/dates";
+import { useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import React, { FC, ReactNode, useCallback } from "react";
@@ -14,6 +15,10 @@ import {
 import { useSnapshot } from "valtio";
 
 export const Calendar: FC = () => {
+  const matches = useMediaQuery("(min-width: 576px)", true, {
+    getInitialValueInEffect: false,
+  });
+
   const { selectedDate } = useSnapshot(state);
   const { pathname, push } = useRouter();
   const { posts } = usePosts();
@@ -44,21 +49,21 @@ export const Calendar: FC = () => {
         <Indicator
           color="red"
           label={postsInDate.length.toString()}
-          size={20}
-          offset={10}
+          size={matches ? 20 : 15}
+          offset={matches ? 10 : 8}
           disabled={!postsInDate.length}
         >
           <div>{day}</div>
         </Indicator>
       );
     },
-    [posts]
+    [posts, matches]
   );
 
   return (
     <Card shadow="xs">
       <MantineCalendar
-        size="lg"
+        size={matches ? "lg" : "md"}
         labelFormat="YYYY/MM"
         locale="ja"
         firstDayOfWeek="sunday"
@@ -70,7 +75,7 @@ export const Calendar: FC = () => {
             ? {
                 backgroundColor: "#5C5F66",
               }
-            : date.getDay() === 6
+            : date.getDay() === 6 && !modifiers.outside
             ? { color: "#339AF0" }
             : {}
         }

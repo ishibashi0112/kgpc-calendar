@@ -14,6 +14,7 @@ export const Layout: FC<Props> = ({ children, size }) => {
     <div className="h-full">
       <AppShell
         header={<Header />}
+        padding="xs"
         styles={(theme) => ({
           main: {
             backgroundColor:
@@ -23,7 +24,9 @@ export const Layout: FC<Props> = ({ children, size }) => {
           },
         })}
       >
-        <Container size={size}>{children}</Container>
+        <Container size={size} px={0}>
+          {children}
+        </Container>
       </AppShell>
     </div>
   );

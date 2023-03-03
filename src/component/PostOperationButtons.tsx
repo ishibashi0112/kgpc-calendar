@@ -33,9 +33,10 @@ export const PostOperationButtons: FC<Props> = ({
       disabled={!isProcessing}
     >
       {IconOnly ? (
-        <Group spacing={4} noWrap>
+        <Group spacing="xs" noWrap>
           <Tooltip label="編集" openDelay={500}>
             <ActionIcon
+              variant="light"
               disabled={isProcessing}
               component={Link}
               href={`/editForm?id=${post.id}`}
@@ -46,6 +47,7 @@ export const PostOperationButtons: FC<Props> = ({
           <Tooltip label="削除" openDelay={500}>
             <ActionIcon
               color="red"
+              variant="light"
               onClick={() => modalOpen(post as PostUser<string>)}
               disabled={isProcessing}
             >

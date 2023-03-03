@@ -29,7 +29,7 @@ export const ScheduleList: FC = () => {
   }
 
   return (
-    <Card className="flex-1 min-h-[500px] overflow-visible" shadow="xs">
+    <Card className="min-h-[500px] overflow-visible" shadow="xs">
       <ListHeader />
 
       {completedPosts.length ? <Divider my="xs" label="未完" /> : null}

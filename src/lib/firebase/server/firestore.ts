@@ -72,3 +72,31 @@ export const getUsers = async (): Promise<User[]> => {
 
   return users;
 };
+
+export const getPostsByUserId = async (userId: string): Promise<PostUser[]> => {
+  const querySnapshot = await adminDB
+    .collection("posts")
+    .where("userId", "==", userId)
+    .get();
+
+  const postsData = await Promise.all(
+    querySnapshot.docs.map(async (postDoc) => {
+      const postData = postDoc.data() as Post<Timestamp>;
+      const user = await getUserById(postData.userId);
+      const dateToStringInProcesses = postData.processes.map((process) => ({
+        ...process,
+        updatedAt: process.updatedAt.toDate(),
+      }));
+      return {
+        ...postData,
+        id: postDoc.id,
+        createdAt: postData.createdAt.toDate(),
+        date: postData.date.toDate(),
+        processes: dateToStringInProcesses,
+        user,
+      };
+    })
+  );
+
+  return postsData;
+};

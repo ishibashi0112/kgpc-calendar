@@ -14,6 +14,7 @@ import {
   TextInput,
   UnstyledButton,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { IconChevronDown, IconTrash, IconUserPlus } from "@tabler/icons";
 import { useRouter } from "next/router";
 import React, { FC, forwardRef, useCallback, useState } from "react";
@@ -47,6 +48,10 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
 );
 
 export const ProcessesInputCard: FC<Props> = (props) => {
+  const matches = useMediaQuery("(min-width: 576px)", true, {
+    getInitialValueInEffect: false,
+  });
+
   const { pathname } = useRouter();
   const form =
     pathname === "/form"
@@ -76,16 +81,16 @@ export const ProcessesInputCard: FC<Props> = (props) => {
   });
 
   return (
-    <div className="relative">
-      <Card
-        className="overflow-visible"
-        sx={(theme) => ({
-          borderColor: hasError() ? theme.colors.red[5] : "",
-        })}
-        key={props.index}
-        withBorder
-        p={0}
-      >
+    <Card
+      className="overflow-visible "
+      sx={(theme) => ({
+        borderColor: hasError() ? theme.colors.red[5] : "",
+      })}
+      key={props.index}
+      withBorder
+      p={0}
+    >
+      <div className="relative">
         <UnstyledButton
           className="w-full p-3"
           sx={(theme) => ({
@@ -97,7 +102,7 @@ export const ProcessesInputCard: FC<Props> = (props) => {
           onClick={() => setOpened((o) => !o)}
         >
           <Group position="apart" align="center" noWrap>
-            <Group>
+            <Group spacing="xs">
               <Text fz="sm" weight="bold">{`工程${props.index + 1}`}</Text>
 
               <Divider orientation="vertical" />
@@ -114,15 +119,6 @@ export const ProcessesInputCard: FC<Props> = (props) => {
 
               <Divider orientation="vertical" />
 
-              {props.process.description ? (
-                <Text fz="xs">{props.process.description}</Text>
-              ) : (
-                <Text fz="xs" color="dimmed">
-                  備考
-                </Text>
-              )}
-
-              <Divider orientation="vertical" />
               {props.process.users.length ? (
                 <Group spacing={2}>
                   {props.process.users.map((userName, index) => (
@@ -142,6 +138,20 @@ export const ProcessesInputCard: FC<Props> = (props) => {
                   担当者
                 </Text>
               )}
+
+              {matches ? (
+                <>
+                  <Divider orientation="vertical" />
+
+                  {props.process.description ? (
+                    <Text fz="xs">{props.process.description}</Text>
+                  ) : (
+                    <Text fz="xs" color="dimmed">
+                      備考
+                    </Text>
+                  )}
+                </>
+              ) : null}
             </Group>
 
             <Group>
@@ -152,49 +162,55 @@ export const ProcessesInputCard: FC<Props> = (props) => {
             </Group>
           </Group>
         </UnstyledButton>
-
-        <Collapse in={opened}>
-          <Stack px={12} pb={12} spacing={5}>
-            <Autocomplete
-              data={autoCompleteData}
-              classNames={{ label: "text-xs" }}
-              label="タイトル"
-              placeholder="工程のタイトル"
-              withAsterisk
-              {...form.getInputProps(`processes.${props.index}.title`)}
-            />
-            <TextInput
-              classNames={{ label: "text-xs" }}
-              label="備考"
-              placeholder="特記事項等"
-              {...form.getInputProps(`processes.${props.index}.description`)}
-            />
-            <MultiSelect
-              data={usersSelectData}
-              itemComponent={SelectItem}
-              classNames={{ label: "text-xs" }}
-              label="担当者"
-              placeholder="Pick all you like"
-              withAsterisk
-              searchable
-              nothingFound="Nothing found"
-              icon={<IconUserPlus size={12} />}
-              {...form.getInputProps(`processes.${props.index}.users`)}
-            />
-          </Stack>
-        </Collapse>
-
         {isRemoveable && (
           <ActionIcon
-            className="active:translate-y-0 absolute top-2 right-3"
+            className="active:translate-y-0 "
+            size="sm"
+            style={{
+              transform: "translateY(-50%)",
+              position: "absolute",
+              top: "50%",
+              right: "12px",
+            }}
             variant="light"
             color="red"
             onClick={() => form.removeListItem("processes", props.index)}
           >
-            <IconTrash size={16} />
+            <IconTrash size={15} />
           </ActionIcon>
         )}
-      </Card>
-    </div>
+      </div>
+
+      <Collapse in={opened}>
+        <Stack px={12} pb={12} spacing={5}>
+          <Autocomplete
+            data={autoCompleteData}
+            classNames={{ label: "text-xs" }}
+            label="タイトル"
+            placeholder="工程のタイトル"
+            withAsterisk
+            {...form.getInputProps(`processes.${props.index}.title`)}
+          />
+          <TextInput
+            classNames={{ label: "text-xs" }}
+            label="備考"
+            placeholder="特記事項等"
+            {...form.getInputProps(`processes.${props.index}.description`)}
+          />
+          <MultiSelect
+            data={usersSelectData}
+            itemComponent={SelectItem}
+            classNames={{ label: "text-xs" }}
+            label="担当者"
+            placeholder="Pick all you like"
+            withAsterisk
+            searchable
+            nothingFound="Nothing found"
+            icon={<IconUserPlus size={12} />}
+            {...form.getInputProps(`processes.${props.index}.users`)}
+          />
+        </Stack>
+      </Collapse>
+    </Card>
   );
 };

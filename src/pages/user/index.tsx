@@ -1,101 +1,77 @@
 import {
   Anchor,
-  Avatar,
   Badge,
   Card,
   Group,
+  Loader,
   Space,
   Stack,
   Tabs,
   Text,
 } from "@mantine/core";
-import { IconLogout } from "@tabler/icons";
 import dayjs from "dayjs";
-import { NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import Link from "next/link";
 import React from "react";
-import { MainButton } from "src/component/MainButton";
 import { PostOperationButtons } from "src/component/PostOperationButtons";
-import { StateIcon } from "src/component/StateIcon";
-import { signOut } from "src/lib/firebase/firebaseAuth";
-import { usePosts } from "src/lib/hook/swr/usePosts";
+import { getPostsByUserId } from "src/lib/firebase/server/firestore";
 import { useDeleteModal } from "src/lib/hook/useDeleteModal";
 import { useSnapshot } from "src/lib/hook/useSnapShot";
+import { formatPosts } from "src/lib/utils/function";
 import { Layout } from "src/pages-Layout/Layout";
 import { PostUser } from "src/type/types";
 
 type Props = {
-  fallback: Record<string, PostUser<string>>;
+  posts: PostUser<string>[];
 };
 
-// export const getServerSideProps: GetServerSideProps = async (ctx: any) => {
-//   const postId = ctx.params.id as string;
-//   try {
-//     const post = await getPostById(postId);
-//     const dateToStringPost = formatPost(post);
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const userId = ctx.query.id as string;
+  console.log("userId", userId);
 
-//     return { props: { fallback: { [`/post/${postId}`]: dateToStringPost } } };
-//   } catch (error) {
-//     console.log(error);
+  try {
+    const posts = await getPostsByUserId(userId);
+    console.log("posts", posts);
 
-//     return { props: { fallback: { [`/post/${postId}`]: {} } } };
-//   }
-// };
+    const dateToStringPosts = formatPosts(posts);
 
-const User: NextPage<Props> = ({ fallback }) => {
+    return { props: { posts: dateToStringPosts } };
+  } catch (error) {
+    console.log(error);
+
+    return { props: { posts: [] } };
+  }
+};
+
+const User: NextPage<Props> = (props) => {
   const { modalOpen, ModalComponent } = useDeleteModal();
   const { user } = useSnapshot();
-  const { posts, isLoading } = usePosts();
 
-  if (isLoading) {
-    return <>Loading...</>;
+  if (!user) {
+    return (
+      <Group position="center" mt={10}>
+        <Loader />
+      </Group>
+    );
   }
 
-  const currentUserPosts = posts
-    ? posts.filter((post) => post.user.id === user?.id)
-    : [];
-
-  const handleSignOut = async () => {
-    try {
-      const result = window.confirm("ログアウトしますか？");
-      if (result) {
-        await signOut();
-      }
-    } catch (error) {
-      alert(error);
-    }
-  };
   return (
     <Layout size="sm">
       <div className="p-2">
-        <Group spacing="xl">
-          <Avatar className="block" size="xl" color="dark" radius={9999}>
-            {user?.firstName}
-          </Avatar>
-          <div className="flex-1">
-            <Group position="apart">
-              <Group>
-                <Text fz="lg" fw="bold">
-                  {user?.name}
-                </Text>
-                <Badge>{user?.type}</Badge>
-              </Group>
-              <MainButton
-                size="xs"
-                leftIcon={<IconLogout size={16} />}
-                onClick={handleSignOut}
-              >
-                ログアウト
-              </MainButton>
-            </Group>
+        <div className="flex-1">
+          <Group>
+            <Text fz="lg" fw="bold">
+              {user?.name}
+            </Text>
+            <Badge>{user?.type}</Badge>
+          </Group>
 
-            <Text>{user?.email}</Text>
-          </div>
-        </Group>
+          <Text>{user?.email}</Text>
+        </div>
 
         <Space h={20} />
 
-        <Tabs color="dark" defaultValue="予定">
+        <Tabs defaultValue="予定">
           <Tabs.List>
             <Tabs.Tab value="予定">予定</Tabs.Tab>
           </Tabs.List>
@@ -104,7 +80,7 @@ const User: NextPage<Props> = ({ fallback }) => {
             <Space h="xs" />
 
             <Stack spacing={8}>
-              {currentUserPosts.map((post) => (
+              {props.posts.map((post) => (
                 <Card
                   key={post.id}
                   className="overflow-visible"
@@ -112,30 +88,38 @@ const User: NextPage<Props> = ({ fallback }) => {
                   p="sm"
                 >
                   <Group>
-                    <Text fz="xs">
-                      {dayjs(post.date).locale("ja").format("YY年M月D日(dd)")}
+                    <Text fz="xs" underline>
+                      {`予定日: ${dayjs(post.date)
+                        .locale("ja")
+                        .format("YY年M月D日(dd)")}`}
                     </Text>
-                    <Group className="flex-1" position="apart" noWrap>
-                      <Group spacing={5}>
-                        <StateIcon post={post as PostUser<string>} />
+                    <Text fz="xs" color="dimmed">
+                      {`最終更新: ${dayjs(post.createdAt)
+                        .locale("ja")
+                        .format("YY/M/D/(dd)")}`}
+                    </Text>
+                  </Group>
 
-                        <Anchor
-                          className="flex-1"
-                          variant="text"
-                          component={Link}
-                          href={`/post/${post.id}`}
-                          lineClamp={1}
-                        >
-                          {post.title}
-                        </Anchor>
-                      </Group>
+                  <Group className="flex-1" position="apart" noWrap>
+                    <Group spacing={5}>
+                      {/* <StateIcon post={post as PostUser<string>} /> */}
 
-                      <PostOperationButtons
-                        post={post as PostUser<string>}
-                        modalOpen={modalOpen}
-                        IconOnly
-                      />
+                      <Anchor
+                        className="flex-1"
+                        variant="text"
+                        component={Link}
+                        href={`/post/${post.id}`}
+                        lineClamp={1}
+                      >
+                        {post.title}
+                      </Anchor>
                     </Group>
+
+                    <PostOperationButtons
+                      post={post as PostUser<string>}
+                      modalOpen={modalOpen}
+                      IconOnly
+                    />
                   </Group>
                 </Card>
               ))}
@@ -143,8 +127,9 @@ const User: NextPage<Props> = ({ fallback }) => {
           </Tabs.Panel>
         </Tabs>
       </div>
+
+      {ModalComponent}
     </Layout>
-    // </SWRConfig>
   );
 };
 

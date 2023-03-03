@@ -12,6 +12,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
+import { useMediaQuery } from "@mantine/hooks";
 import { IconCalendar, IconFile } from "@tabler/icons";
 import React, { FC } from "react";
 
@@ -26,10 +27,15 @@ type Props = {
 
 export const InputStep: FC<Props> = (props) => {
   const form = useFormContext();
+
+  const matches = useMediaQuery("(min-width: 576px)", true, {
+    getInitialValueInEffect: false,
+  });
+
   return (
     <Card shadow="xs">
       <Stack>
-        <Group noWrap>
+        <Group noWrap={matches}>
           <InputCompletionButton menuType="template" />
           <InputCompletionButton menuType="history" />
         </Group>

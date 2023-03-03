@@ -46,6 +46,15 @@ export const InputCompletionButton: FC<Props> = (props) => {
     <Menu shadow="md" width="target" withArrow>
       <Menu.Target>
         <Button
+          sx={(theme) => ({
+            border: 1,
+            borderStyle: "solid",
+            borderColor: theme.colors.dark[8],
+            "&:hover": {
+              borderColor:
+                theme.colorScheme === "dark" ? "white" : theme.colors.dark[8],
+            },
+          })}
           variant="filled"
           fullWidth
           color="dark"
