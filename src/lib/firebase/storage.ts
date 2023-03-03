@@ -1,6 +1,8 @@
 import {
   deleteObject,
+  FullMetadata,
   getDownloadURL,
+  getMetadata,
   ref,
   uploadBytes,
   UploadResult,
@@ -18,7 +20,7 @@ export const fileUpload = async (
   return uploadTask;
 };
 
-export const fileDownload = async (filePath: string) => {
+export const fileDownload = async (filePath: string): Promise<string> => {
   const storageRef = ref(storage, filePath);
   const fileURL = await getDownloadURL(storageRef);
 
@@ -28,4 +30,10 @@ export const fileDownload = async (filePath: string) => {
 export const deleteFile = async (filePath: string): Promise<void> => {
   const storageRef = ref(storage, filePath);
   await deleteObject(storageRef);
+};
+
+export const getFileName = async (filePath: string): Promise<FullMetadata> => {
+  const storageRef = ref(storage, filePath);
+  const fileMetadata = await getMetadata(storageRef);
+  return fileMetadata;
 };

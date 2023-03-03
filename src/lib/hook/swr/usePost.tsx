@@ -15,6 +15,7 @@ const fetcher = async (url: string) => {
 export const usePost = () => {
   const router = useRouter();
   const postId = router.query.id;
+
   const { data, isLoading, error } = useSWRImmutable<PostUser<string>, Error>(
     postId ? `/post/${postId}` : null,
     fetcher

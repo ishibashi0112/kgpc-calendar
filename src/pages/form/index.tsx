@@ -2,32 +2,35 @@ import "dayjs/locale/ja";
 
 import { GetServerSideProps, NextPage } from "next";
 import React from "react";
-import { getUsers } from "src/lib/firebase/firestore";
+import { getUsers } from "src/lib/firebase/server/firestore";
 import { FormBody } from "src/pages-component/form/FormBody";
 import { Layout } from "src/pages-Layout/Layout";
 import { User } from "src/type/types";
+import { SWRConfig } from "swr";
 
 type Props = {
-  users: User[];
+  fallback: { users: User[] };
 };
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps = async () => {
   try {
     const users = await getUsers();
 
     return {
-      props: { users },
+      props: { fallback: { users } },
     };
   } catch (error) {
-    return { props: { users: [], date: ctx.query.date } };
+    return { props: { fallback: { users: [] } } };
   }
 };
 
-const Form: NextPage<Props> = (props) => {
+const Form: NextPage<Props> = ({ fallback }) => {
   return (
-    <Layout>
-      <FormBody {...props} />
-    </Layout>
+    <SWRConfig value={{ fallback }}>
+      <Layout size="md">
+        <FormBody />
+      </Layout>
+    </SWRConfig>
   );
 };
 

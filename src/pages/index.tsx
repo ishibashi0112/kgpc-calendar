@@ -2,7 +2,7 @@ import "dayjs/locale/ja";
 
 import { GetServerSideProps, NextPage } from "next";
 import React from "react";
-import { getPosts } from "src/lib/firebase/firestore";
+import { getPosts } from "src/lib/firebase/server/firestore";
 import { formatPosts } from "src/lib/utils/function";
 import { IndexBody } from "src/pages-component/Index/IndexBody";
 import { Layout } from "src/pages-Layout/Layout";
@@ -34,7 +34,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 const Home: NextPage<Props> = ({ fallback }) => {
   return (
     <SWRConfig value={{ fallback }}>
-      <Layout>
+      <Layout size="lg">
         <IndexBody />
       </Layout>
     </SWRConfig>

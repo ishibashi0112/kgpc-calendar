@@ -11,12 +11,34 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { useForm, zodResolver } from "@mantine/form";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { FC, useCallback, useState } from "react";
 import { auth } from "src/lib/firebase/firebase";
-import { signUp, SignUpValues } from "src/lib/firebase/firebaseAuth";
+import { signUp } from "src/lib/firebase/firebaseAuth";
+import { SignUpValues } from "src/type/types";
+import { z } from "zod";
+
+export const signUpSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, { message: "emailを入力してください。" })
+      .email("emailの形式に合っておりません。"),
+    password: z.string().min(1, { message: "パスワードを入力してください。" }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "確認用パスワードを入力してください。" }),
+    firstName: z.string().min(1, { message: "氏を入力してください。" }),
+    lastName: z.string().min(1, { message: "名を入力してください。" }),
+    type: z.union([z.literal("発注"), z.literal("部品")]),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "パスワードが一致しません。",
+    path: ["confirmPassword"],
+  })
+  .transform((data) => ({ ...data, name: data.firstName + data.lastName }));
 
 export const SignUp: FC = () => {
   const { push } = useRouter();
@@ -28,26 +50,23 @@ export const SignUp: FC = () => {
       password: "",
       confirmPassword: "",
       name: "",
+      firstName: "",
+      lastName: "",
       type: "発注",
     },
-    validate: {
-      email: (value) =>
-        /^\S+@\S+$/.test(value) ? null : "emailの値が正しくありません",
-      password: (value, values) =>
-        !(value.length >= 6)
-          ? "パスワードは6文字以上でなければいけません"
-          : value !== values.confirmPassword
-          ? "確認用のパスワード入力値と一致していません"
-          : null,
-    },
+    validate: zodResolver(signUpSchema),
   });
 
   const handleSubmit = useCallback(
     async (values: typeof form.values) => {
       try {
         setIsLoadaing(true);
-        await signUp(values);
+
+        const parsedValues = signUpSchema.parse(values);
+
+        await signUp(parsedValues);
         setIsSignInCompleted(true);
+        await push("/");
       } catch (error) {
         console.log(error);
         setIsLoadaing(false);
@@ -67,32 +86,42 @@ export const SignUp: FC = () => {
         <TextInput
           label="email"
           type="email"
-          required
           {...form.getInputProps("email")}
         />
+        <PasswordInput label="パスワード" {...form.getInputProps("password")} />
         <PasswordInput
-          label="password"
-          required
-          {...form.getInputProps("password")}
-        />
-        <PasswordInput
-          label="confirm password"
-          required
+          label="パスワード確認用"
           {...form.getInputProps("confirmPassword")}
         />
-        <TextInput label="名前" required {...form.getInputProps("name")} />
+        <Group>
+          <TextInput
+            label="氏"
+            placeholder="山田"
+            {...form.getInputProps("firstName")}
+          />
+          <TextInput
+            label="名"
+            placeholder="太郎"
+            {...form.getInputProps("lastName")}
+          />
+        </Group>
+
         <Select
           label="所属"
           data={["発注", "部品"]}
-          required
           {...form.getInputProps("type")}
         />
-        <Button className="mt-5" type="submit">
+        <Button className="mt-5" type="submit" color="dark">
           登録
         </Button>
       </form>
       <Group position="right">
-        <Anchor component={Link} href="/auth?authType=signin">
+        <Anchor
+          className="hover:underline"
+          variant="text"
+          component={Link}
+          href="/auth?authType=signin"
+        >
           ログインはこちら
         </Anchor>
       </Group>

@@ -1,4 +1,4 @@
-import { Group, Popover, Space, Text } from "@mantine/core";
+import { Popover } from "@mantine/core";
 import React, { FC } from "react";
 import { PostUser } from "src/type/types";
 
@@ -16,18 +16,17 @@ export const PostStateIcon: FC<Props> = ({ post }) => {
   }, 0);
 
   return (
-    <Popover width={400} position="bottom-start">
+    <Popover
+      width={400}
+      position="bottom-start"
+      withArrow
+      arrowOffset={10}
+      arrowSize={10}
+    >
       <Popover.Target>
         <StateIcon post={post} pointer />
       </Popover.Target>
       <Popover.Dropdown>
-        <Group noWrap>
-          <StateIcon post={post} />
-          <Text lineClamp={1}>{post.title}</Text>
-        </Group>
-
-        <Space h="md" />
-
         <ProcessTimeLine
           processes={post.processes}
           processNum={processNum}

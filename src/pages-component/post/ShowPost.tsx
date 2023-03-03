@@ -1,4 +1,5 @@
-import { Group, Space, Text, Textarea } from "@mantine/core";
+import { Card, Group, Space, Text, Textarea } from "@mantine/core";
+import dayjs from "dayjs";
 import React, { FC } from "react";
 import { PostOperationButtons } from "src/component/PostOperationButtons";
 import { usePost } from "src/lib/hook/swr/usePost";
@@ -13,20 +14,22 @@ export const ShowPost: FC = () => {
 
   if (!post)
     return (
-      <div className="flex-1 p-3">
+      <Card className="flex-1 min-h-[500px] overflow-visible" shadow="xs">
         <ListHeader />
         <div>post情報が取得できませんでした。</div>
-      </div>
+      </Card>
     );
 
   return (
-    <div className="flex-1 p-3">
+    <Card className="flex-1 min-h-[500px] overflow-visible" shadow="xs">
       <ListHeader />
 
       <PostList post={post} />
 
       <Group position="right">
-        <Text fz="xs">{`作成日: ${22 / 12 / 25}`}</Text>
+        <Text fz="xs">{`作成日: ${dayjs(post.createdAt)
+          .locale("ja")
+          .format("YY年M月D日(dd)")}`}</Text>
       </Group>
 
       <Space h="xs" />
@@ -43,6 +46,6 @@ export const ShowPost: FC = () => {
       />
 
       {ModalComponent}
-    </div>
+    </Card>
   );
 };

@@ -4,24 +4,12 @@ import {
   signOut as firebaseSignOut,
   UserCredential,
 } from "firebase/auth";
-import { User } from "src/type/types";
+import { SignInValues, SignUpValues } from "src/type/types";
 
 import { auth } from "./firebase";
 import { createUser } from "./firestore";
 
-type SignUpData = {
-  email: string;
-  password: string;
-  confirmPassword: string;
-};
-export type SignInData = {
-  email: string;
-  password: string;
-};
-
-export type SignUpValues = SignUpData & Omit<User, "id">;
-
-export const signIn = async (data: SignInData): Promise<UserCredential> => {
+export const signIn = async (data: SignInValues): Promise<UserCredential> => {
   const user = await signInWithEmailAndPassword(
     auth,
     data.email,
@@ -38,6 +26,8 @@ export const signUp = async (data: SignUpValues): Promise<void> => {
   );
 
   const userData = {
+    firstName: data.firstName,
+    lastName: data.lastName,
     name: data.name,
     email: data.email,
     type: data.type,

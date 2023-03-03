@@ -1,6 +1,6 @@
 import { GetServerSideProps, NextPage } from "next";
 import React from "react";
-import { getPostById } from "src/lib/firebase/firestore";
+import { getPostById } from "src/lib/firebase/server/firestore";
 import { formatPost } from "src/lib/utils/function";
 import { PostIdBody } from "src/pages-component/post/PostIdBody";
 import { Layout } from "src/pages-Layout/Layout";
@@ -28,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx: any) => {
 const PostId: NextPage<Props> = ({ fallback }) => {
   return (
     <SWRConfig value={{ fallback }}>
-      <Layout>
+      <Layout size="lg">
         <PostIdBody />
       </Layout>
     </SWRConfig>

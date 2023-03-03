@@ -1,6 +1,6 @@
 import "dayjs/locale/ja";
 
-import { Group, Indicator, Space, Switch } from "@mantine/core";
+import { Card, Indicator } from "@mantine/core";
 import { Calendar as MantineCalendar } from "@mantine/dates";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
@@ -56,7 +56,7 @@ export const Calendar: FC = () => {
   );
 
   return (
-    <div>
+    <Card shadow="xs">
       <MantineCalendar
         size="lg"
         labelFormat="YYYY/MM"
@@ -65,13 +65,16 @@ export const Calendar: FC = () => {
         value={selectedDate}
         onChange={handleOnchange}
         renderDay={dayViewRender}
+        dayStyle={(date, modifiers) =>
+          modifiers.selected
+            ? {
+                backgroundColor: "#5C5F66",
+              }
+            : date.getDay() === 6
+            ? { color: "#339AF0" }
+            : {}
+        }
       />
-
-      <Space h="xs" />
-
-      <Group position="right">
-        <Switch labelPosition="left" label="関係のある予定のみ表示" />
-      </Group>
-    </div>
+    </Card>
   );
 };

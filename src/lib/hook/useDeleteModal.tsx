@@ -1,4 +1,5 @@
 import { Button, Group, Modal, Space, Stack, Text } from "@mantine/core";
+import { IconAlertTriangle } from "@tabler/icons";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
@@ -6,6 +7,7 @@ import { deletePost } from "src/lib/firebase/firestore";
 import { PostUser } from "src/type/types";
 
 import { deleteFile } from "../firebase/storage";
+import { usePosts } from "./swr/usePosts";
 
 type ModalState = {
   isLoading: boolean;
@@ -20,6 +22,7 @@ type UseDeleteModalType = () => {
 
 export const useDeleteModal: UseDeleteModalType = () => {
   const { push } = useRouter();
+  const { mutate } = usePosts();
   const [modalState, SetModalState] = useState<ModalState>({
     isLoading: false,
     opened: false,
@@ -41,10 +44,11 @@ export const useDeleteModal: UseDeleteModalType = () => {
       SetModalState((prev) => ({ ...prev, isLoading: true }));
 
       if (modalState.post.file) {
-        await deleteFile(modalState.post.file);
+        await deleteFile(modalState.post.file.path);
       }
 
       await deletePost(modalState.post.id);
+      await mutate();
       alert("削除しました");
       SetModalState((prev) => ({ ...prev, opened: false }));
       await push("/");
@@ -59,25 +63,36 @@ export const useDeleteModal: UseDeleteModalType = () => {
 
   const ModalComponent = modalState.post ? (
     <Modal
+      classNames={{ body: "text-sm" }}
       opened={modalState.opened}
       onClose={() => SetModalState((prev) => ({ ...prev, opened: false }))}
       closeOnClickOutside={!modalState.isLoading}
-      title="削除"
+      withCloseButton={false}
+      title={
+        <Group position="center" spacing={5}>
+          <IconAlertTriangle size={18} />
+          <Text>予定を削除しますか？</Text>
+        </Group>
+      }
     >
-      <Text>こちらの予定を削除してもよろしいでしょうか？</Text>
-
-      <Space h={10} />
-
       <Stack spacing={2}>
         <Text fz="sm">
           {dayjs(modalState.post.date).locale("ja").format("YY年M月D日(dd)")}
+          <Text fz="sm">{modalState.post.title}</Text>
         </Text>
-        <Text>{modalState.post.title}</Text>
       </Stack>
 
       <Space h={30} />
 
       <Group position="right">
+        <Button
+          variant="default"
+          onClick={() => SetModalState((prev) => ({ ...prev, opened: false }))}
+          loading={modalState.isLoading}
+          loaderPosition="center"
+        >
+          閉じる
+        </Button>
         <Button
           color="red"
           onClick={() => handleRemove()}

@@ -14,7 +14,7 @@ type Proxy = {
 export const state = proxy<Proxy>({
   user: null,
   post: null,
-  selectedDate: new Date(),
+  selectedDate: dayjs().toDate(),
   selectedDatePosts: [],
 });
 

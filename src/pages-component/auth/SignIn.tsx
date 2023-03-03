@@ -1,38 +1,44 @@
 import {
   Anchor,
-  Button,
   Card,
   Group,
   Loader,
   LoadingOverlay,
   PasswordInput,
+  Space,
   Text,
   TextInput,
   Title,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { useForm, zodResolver } from "@mantine/form";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { FC, useCallback, useEffect, useState } from "react";
+import { MainButton } from "src/component/MainButton";
 import { auth } from "src/lib/firebase/firebase";
-import { signIn, SignInData } from "src/lib/firebase/firebaseAuth";
+import { signIn } from "src/lib/firebase/firebaseAuth";
+import { SignInValues } from "src/type/types";
+import { z } from "zod";
+
+export const signInSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: "emailを入力してください。" })
+    .email("emailの形式に合っておりません。"),
+  password: z.string().min(1, { message: "パスワードを入力してください。" }),
+});
 
 export const SignIn: FC = () => {
+  const { push } = useRouter();
   const [isloading, setIsLoadaing] = useState(false);
   const [isSignInError, setIsSignInError] = useState(false);
   const [isSignInCompleted, setIsSignInCompleted] = useState(false);
-  const form = useForm<SignInData>({
+  const form = useForm<SignInValues>({
     initialValues: {
       email: "",
       password: "",
     },
-    validate: {
-      email: (value) =>
-        /^\S+@\S+$/.test(value) ? null : "emailの値が正しくありません",
-      password: (value) =>
-        !(value.length >= 6)
-          ? "パスワードは6文字以上でなければいけません"
-          : null,
-    },
+    validate: zodResolver(signInSchema),
   });
 
   const handleSubmit = useCallback(
@@ -41,6 +47,7 @@ export const SignIn: FC = () => {
         setIsLoadaing(true);
         await signIn(values);
         setIsSignInCompleted(true);
+        await push("/");
       } catch (error: any) {
         const errorMessage = error.message;
         if (errorMessage.includes("auth/user-not-found")) {
@@ -75,20 +82,21 @@ export const SignIn: FC = () => {
         <TextInput
           label="email"
           type="email"
-          required
           {...form.getInputProps("email")}
         />
-        <PasswordInput
-          label="password"
-          required
-          {...form.getInputProps("password")}
-        />
-        <Button className="mt-5" type="submit">
-          ログイン
-        </Button>
+        <PasswordInput label="パスワード" {...form.getInputProps("password")} />
+
+        <Space h={20} />
+
+        <MainButton type="submit">ログイン</MainButton>
       </form>
       <Group position="right">
-        <Anchor component={Link} href="/auth?authType=signup">
+        <Anchor
+          className="hover:underline"
+          variant="text"
+          component={Link}
+          href="/auth?authType=signup"
+        >
           新規登録はこちら
         </Anchor>
       </Group>

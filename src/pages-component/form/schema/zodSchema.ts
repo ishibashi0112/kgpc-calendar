@@ -25,6 +25,13 @@ export const formSchema = z.object({
   processes: processSchema.array(),
 });
 
+export const editFormSchema = formSchema.omit({ file: true }).merge(
+  z.object({
+    prevFile: z.string(),
+    updatedFile: z.custom<File>().nullable(),
+  })
+);
+
 export const transformedProcessSchema = processSchema.merge(
   z.object({ users: userSchema.array() })
 );
@@ -33,9 +40,8 @@ export const transformedSchema = formSchema.merge(
   z.object({ processes: transformedProcessSchema.array() })
 );
 
-export const transformedEditFormSchema = formSchema.merge(
+export const transformedEditFormSchema = editFormSchema.merge(
   z.object({
     processes: transformedProcessSchema.array(),
-    file: z.union([z.custom<File>(), z.string()]).nullable(),
   })
 );

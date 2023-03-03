@@ -1,21 +1,17 @@
 import "dayjs/locale/ja";
 
-import { AppShell, Container, useMantineTheme } from "@mantine/core";
-import { useRouter } from "next/router";
+import { AppShell, Container, MantineNumberSize } from "@mantine/core";
 import React, { FC, ReactNode } from "react";
 import { Header } from "src/pages-component/Header";
 
 type Props = {
   children: ReactNode;
+  size: MantineNumberSize;
 };
 
-export const Layout: FC<Props> = ({ children }) => {
-  const { pathname } = useRouter();
-  const theme = useMantineTheme();
-
-  const size = pathname === "/form" ? "md" : "lg";
+export const Layout: FC<Props> = ({ children, size }) => {
   return (
-    <div className="h-full bg-black">
+    <div className="h-full">
       <AppShell
         header={<Header />}
         styles={(theme) => ({
@@ -24,21 +20,10 @@ export const Layout: FC<Props> = ({ children }) => {
               theme.colorScheme === "dark"
                 ? theme.colors.dark[8]
                 : theme.colors.gray[0],
-            paddingTop: 50,
-            paddingBottom: 0,
           },
         })}
       >
-        <Container
-          className="min-h-[calc(100vh-50px)]"
-          style={{
-            backgroundColor:
-              theme.colorScheme === "dark" ? theme.colors.dark[7] : "white",
-          }}
-          size={size}
-        >
-          {children}
-        </Container>
+        <Container size={size}>{children}</Container>
       </AppShell>
     </div>
   );

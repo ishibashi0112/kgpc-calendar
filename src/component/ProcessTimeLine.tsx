@@ -22,24 +22,29 @@ export const ProcessTimeLine: FC<Props> = (props) => {
             <div>
               <Group mt={2} align="center" spacing={1}>
                 <Text size="xs">担当者：</Text>
-                {process.users.map((user: Omit<User, "email"> | string) =>
-                  typeof user === "string" ? (
-                    <div key={user}>
-                      <Badge color="gray" size="sm" variant="filled">
-                        {user.slice(0, 2)}
-                      </Badge>
+                {process.users.map(
+                  (
+                    user:
+                      | Omit<User, "email" | "firstName" | "lastName">
+                      | string
+                  ) =>
+                    typeof user === "string" ? (
+                      <div key={user}>
+                        <Badge color="gray" size="sm" variant="filled">
+                          {user.slice(0, 2)}
+                        </Badge>
 
-                      <Space w={3} />
-                    </div>
-                  ) : (
-                    <div key={user.id}>
-                      <Badge color="gray" size="sm" variant="filled">
-                        {user.name.slice(0, 2)}
-                      </Badge>
+                        <Space w={3} />
+                      </div>
+                    ) : (
+                      <div key={user.id}>
+                        <Badge color="gray" size="sm" variant="filled">
+                          {user.name.slice(0, 2)}
+                        </Badge>
 
-                      <Space w={3} />
-                    </div>
-                  )
+                        <Space w={3} />
+                      </div>
+                    )
                 )}
               </Group>
 

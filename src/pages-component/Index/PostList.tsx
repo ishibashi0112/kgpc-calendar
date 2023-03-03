@@ -23,7 +23,7 @@ export const PostList: FC<Props> = ({ post }) => {
         <PostStateIcon post={post} />
         {pathname === "/" ? (
           <Anchor
-            className="flex-1"
+            className="flex-1 hover:underline"
             variant="text"
             component={Link}
             href={`/post/${post.id}`}
@@ -51,7 +51,7 @@ export const PostList: FC<Props> = ({ post }) => {
               <IconUser size={14} />
             </Group>
           }
-        >{`${post.user.name.slice(0, 3)}`}</Badge>
+        >{`${post.user.firstName}`}</Badge>
       </Group>
     </Group>
   );

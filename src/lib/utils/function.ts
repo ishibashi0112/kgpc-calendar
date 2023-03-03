@@ -1,15 +1,25 @@
 import dayjs from "dayjs";
-import { PostUser } from "src/type/types";
+import { PostUser, Processes } from "src/type/types";
+
+const dateToString = (date: Date): string => {
+  return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+};
+
+export const formatProcesses = (
+  processes: Processes<Date>[]
+): Processes<string>[] => {
+  return processes.map((process) => ({
+    ...process,
+    updatedAt: dateToString(process.updatedAt),
+  }));
+};
 
 export const formatPost = (post: PostUser<Date>): PostUser<string> => {
-  const dateToStringInProcesses = post.processes.map((process) => ({
-    ...process,
-    updatedAt: dayjs(process.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
-  }));
   return {
     ...post,
-    date: dayjs(post.date).format("YYYY-MM-DD HH:mm:ss"),
-    processes: dateToStringInProcesses,
+    createdAt: dateToString(post.createdAt),
+    date: dateToString(post.date),
+    processes: formatProcesses(post.processes),
   };
 };
 

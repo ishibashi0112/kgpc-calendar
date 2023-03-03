@@ -29,6 +29,7 @@ export const getPosts = async (): Promise<PostUser[]> => {
       return {
         ...postData,
         id: postDoc.id,
+        createdAt: postData.createdAt.toDate(),
         date: postData.date.toDate(),
         processes: dateToStringInProcesses,
         user,
@@ -57,6 +58,7 @@ export const getPostById = async (id: string): Promise<PostUser<Date>> => {
 
   const post = {
     ...postDoc,
+    createdAt: postDoc.createdAt.toDate(),
     date: postDoc.date.toDate(),
     id: docSnap.id,
     user,

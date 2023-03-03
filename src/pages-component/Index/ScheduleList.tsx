@@ -1,6 +1,6 @@
 import "dayjs/locale/ja";
 
-import { Alert, Stack } from "@mantine/core";
+import { Alert, Card, Divider, Space, Stack } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons";
 import React, { FC } from "react";
 import { useSnapshot } from "src/lib/hook/useSnapShot";
@@ -12,21 +12,45 @@ import { PostList } from "./PostList";
 export const ScheduleList: FC = () => {
   const { selectedDatePosts } = useSnapshot();
 
-  return (
-    <div className="flex-1 p-3">
-      <ListHeader />
+  const unCompletedPosts = selectedDatePosts.filter(
+    (post) => !post.isCompleted
+  );
+  const completedPosts = selectedDatePosts.filter((post) => post.isCompleted);
 
-      {selectedDatePosts.length ? (
-        <Stack>
-          {selectedDatePosts.map((post) => (
-            <PostList key={post.id} post={post as PostUser<string>} />
-          ))}
-        </Stack>
-      ) : (
+  if (!selectedDatePosts.length) {
+    return (
+      <Card className="flex-1 min-h-[500px] overflow-visible" shadow="xs">
+        <ListHeader />
         <Alert color="gray" icon={<IconInfoCircle size={18} />}>
           予定はありません。
         </Alert>
-      )}
-    </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="flex-1 min-h-[500px] overflow-visible" shadow="xs">
+      <ListHeader />
+
+      {completedPosts.length ? <Divider my="xs" label="未完" /> : null}
+
+      <Stack>
+        {unCompletedPosts.map((post) => (
+          <PostList key={post.id} post={post as PostUser<string>} />
+        ))}
+      </Stack>
+
+      {completedPosts.length ? (
+        <>
+          <Space h={20} />
+          <Divider my="xs" label="完了" />
+          <Stack>
+            {completedPosts.map((post) => (
+              <PostList key={post.id} post={post as PostUser<string>} />
+            ))}
+          </Stack>
+        </>
+      ) : null}
+    </Card>
   );
 };

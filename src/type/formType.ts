@@ -1,5 +1,5 @@
-import { UseFormReturnType } from "@mantine/form";
 import {
+  editFormSchema,
   formSchema,
   transformedEditFormSchema,
   transformedProcessSchema,
@@ -7,18 +7,16 @@ import {
 } from "src/pages-component/form/schema/zodSchema";
 import { z } from "zod";
 
-export type FormValues<FileType extends File | string = File> = Omit<
-  z.infer<typeof formSchema>,
-  "file"
-> & { file: FileType | null };
+export type FormValues = z.infer<typeof formSchema>;
+export type EditFormValues = z.infer<typeof editFormSchema>;
+
+// export type EditFormValues = Omit<FormValues, "file"> & {
+//   prevFile: string;
+//   updatedFile: File | null;
+// };
 
 export type TransformedProcessValues = z.infer<typeof transformedProcessSchema>;
 export type TransformedFormValues = z.infer<typeof transformedSchema>;
 export type TransformedEditFormValues = z.infer<
   typeof transformedEditFormSchema
->;
-
-export type Form = UseFormReturnType<
-  FormValues,
-  (values: FormValues) => FormValues
 >;

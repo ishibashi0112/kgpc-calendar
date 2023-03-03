@@ -9,16 +9,13 @@ type Props = {
 };
 
 export const Auth: FC<Props> = ({ children }) => {
-  const { pathname, push, replace } = useRouter();
+  const { replace } = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         if (!state.user) {
           setUserState(user.uid);
-        }
-        if (pathname === "/auth") {
-          push("/");
         }
       } else {
         state.user = null;

@@ -24,7 +24,9 @@ export const CompleteButtons: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const isShowCompleteButton = useCallback(
-    (processUsers: Omit<User, "email">[]): boolean => {
+    (
+      processUsers: Omit<User, "email" | "firstName" | "lastName">[]
+    ): boolean => {
       if (!user) return false;
 
       const isTargetUser = processUsers.some(
